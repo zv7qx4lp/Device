@@ -1,0 +1,124 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+-- GUI Setup
+local gui = Instance.new("ScreenGui")
+gui.Name = "NyricXFixNotice"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Dim background
+local dim = Instance.new("Frame")
+dim.Size = UDim2.new(1, 0, 1, 0)
+dim.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+dim.BackgroundTransparency = 0.4
+dim.ZIndex = 1
+dim.Parent = gui
+
+-- Main modal
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 0, 0, 0)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+frame.BorderSizePixel = 0
+frame.BackgroundTransparency = 1
+frame.ClipsDescendants = true
+frame.ZIndex = 2
+frame.Parent = gui
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 20)
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(0, 255, 140)
+stroke.Thickness = 1.8
+stroke.Transparency = 0.3
+
+-- Animate popup
+TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back), {
+	Size = UDim2.new(0, 460, 0, 180),
+	BackgroundTransparency = 0
+}):Play()
+
+-- Title
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 12)
+title.BackgroundTransparency = 1
+title.Text = "🚧 NyricX Hub – Fixing Error"
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(255, 100, 100)
+title.TextSize = 22
+title.ZIndex = 3
+
+-- Description
+local desc = Instance.new("TextLabel", frame)
+desc.Size = UDim2.new(1, -40, 0, 60)
+desc.Position = UDim2.new(0, 20, 0, 50)
+desc.BackgroundTransparency = 1
+desc.TextWrapped = true
+desc.TextColor3 = Color3.fromRGB(230, 230, 230)
+desc.Font = Enum.Font.Gotham
+desc.TextSize = 15
+desc.ZIndex = 3
+desc.Text = "Script is currently under maintenance or experiencing issues.\nJoin our Discord for the latest updates."
+
+-- Copy button
+local button = Instance.new("TextButton", frame)
+button.Size = UDim2.new(0, 200, 0, 36)
+button.Position = UDim2.new(0.5, -100, 0, 122)
+button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Font = Enum.Font.GothamMedium
+button.TextSize = 14
+button.Text = "📋 Copy Discord Link"
+button.BorderSizePixel = 0
+button.ZIndex = 3
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+-- Hover effect
+local hoverIn = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
+local hoverOut = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)})
+
+button.MouseEnter:Connect(function() hoverIn:Play() end)
+button.MouseLeave:Connect(function() hoverOut:Play() end)
+
+-- Copied label
+local copied = Instance.new("TextLabel", frame)
+copied.Size = UDim2.new(1, 0, 0, 20)
+copied.Position = UDim2.new(0.5, -70, 1, -24)
+copied.BackgroundTransparency = 1
+copied.Text = "✅ Link copied!"
+copied.TextColor3 = Color3.fromRGB(0, 255, 140)
+copied.Font = Enum.Font.Gotham
+copied.TextSize = 13
+copied.TextTransparency = 1
+copied.ZIndex = 3
+
+-- Copy & block spam
+local copiedOnce = false
+button.MouseButton1Click:Connect(function()
+	if copiedOnce then return end
+	copiedOnce = true
+	setclipboard("https://discord.gg/hu9eq8yxZT")
+	button.Text = "Copied!"
+	TweenService:Create(copied, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+	task.delay(1.5, function()
+		TweenService:Create(copied, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+	end)
+end)
+
+-- Auto close
+task.delay(5, function()
+	TweenService:Create(frame, TweenInfo.new(0.4), {
+		Size = UDim2.new(0, 0, 0, 0),
+		BackgroundTransparency = 1
+	}):Play()
+	TweenService:Create(dim, TweenInfo.new(0.4), {
+		BackgroundTransparency = 1
+	}):Play()
+	task.wait(0.4)
+	gui:Destroy()
+end)
